@@ -72,8 +72,6 @@ public class RecipeController {
         return recipeService.saveRecipeCommand(command)
                 .flatMap(recipeCommand -> {
                     return Mono.just("redirect:/recipe/" + recipeCommand.getId() + "/show");
-                }).onErrorResume(throwable -> {
-                    return Mono.just(RECIPE_FORM_URL);
                 });
     }
 
