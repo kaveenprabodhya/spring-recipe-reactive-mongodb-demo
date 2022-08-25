@@ -3,6 +3,8 @@ package com.spring.recipegradle.services;
 import com.spring.recipegradle.domain.Recipe;
 import com.spring.recipegradle.repositories.reactive.RecipeReactiveRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -19,8 +21,8 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public Mono<Void> saveImageFile(String recipeId, MultipartFile file) {
-        Mono<Recipe> recipeMono = recipeRepository.findById(recipeId)
+    public Mono<ResponseEntity<Mono<Recipe>>> saveImageFile(String recipeId, MultipartFile file) {
+        return recipeRepository.findById(recipeId)
                 .map(recipe -> {
                     Byte[] byteObjects = new Byte[0];
                     try {
@@ -38,8 +40,6 @@ public class ImageServiceImpl implements ImageService {
                         e.printStackTrace();
                     }
                         return recipe;
-                });
-        recipeRepository.save(recipeMono.block()).block();
-        return Mono.empty();
+                }).map(recipeRepository::save).map(x -> new ResponseEntity<>(x, HttpStatus.CREATED));
     }
 }
