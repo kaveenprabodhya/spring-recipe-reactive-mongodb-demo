@@ -26,12 +26,12 @@ public class RecipeController {
     }
 
     @InitBinder
-    public void initBinder(WebDataBinder webDataBinder){
+    public void initBinder(WebDataBinder webDataBinder) {
         this.webDataBinder = webDataBinder;
     }
 
     @GetMapping("/recipe/{id}/show")
-    public String showById(@PathVariable String id, Model model){
+    public String showById(@PathVariable String id, Model model) {
 
         model.addAttribute("recipe", recipeService.findById(id));
 
@@ -39,20 +39,20 @@ public class RecipeController {
     }
 
     @GetMapping("recipe/new")
-    public String newRecipe(Model model){
+    public String newRecipe(Model model) {
         model.addAttribute("recipe", new RecipeCommand());
 
         return "recipe/recipeform";
     }
 
     @GetMapping("recipe/{id}/update")
-    public String updateRecipe(@PathVariable String id, Model model){
+    public String updateRecipe(@PathVariable String id, Model model) {
         model.addAttribute("recipe", recipeService.findCommandById(id));
         return RECIPE_FORM_URL;
     }
 
     @PostMapping("recipe/new")
-    public Mono<String> saveOrUpdate(@Valid  @ModelAttribute("recipe") RecipeCommand command){
+    public Mono<String> saveOrUpdate(@Valid @ModelAttribute("recipe") RecipeCommand command) {
 //        webDataBinder.validate();
 //        BindingResult bindingResult = webDataBinder.getBindingResult();
 //
@@ -71,19 +71,26 @@ public class RecipeController {
 
         return recipeService.saveRecipeCommand(command)
                 .flatMap(recipeCommand -> {
-                    return Mono.just("redirect:/recipe/"+ recipeCommand.getId() + "/show");
+                    return Mono.just("redirect:/recipe/" + recipeCommand.getId() + "/show");
                 }).onErrorResume(throwable -> {
                     return Mono.just(RECIPE_FORM_URL);
                 });
     }
 
     @GetMapping("recipe/{id}/delete")
-    public String deleteById(@PathVariable String id){
+    public Mono<String> deleteById(@PathVariable String id) {
 
         log.debug("Deleting id: " + id);
 
-        recipeService.deleteById(id).block();
-        return "redirect:/";
+        return recipeService.deleteById(id)
+                .flatMap(response -> {
+                    if (response.getStatusCode().is2xxSuccessful()) {
+                        return Mono.just("redirect:/");
+                    }
+                    return Mono.just("redirect:/400error");
+                }).onErrorResume(throwable -> {
+                    return Mono.just("redirect:/400error");
+                });
     }
 
 //    @ResponseStatus(HttpStatus.NOT_FOUND)
