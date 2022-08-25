@@ -6,6 +6,8 @@ import com.spring.recipegradle.converters.RecipeToRecipeCommand;
 import com.spring.recipegradle.domain.Recipe;
 import com.spring.recipegradle.repositories.reactive.RecipeReactiveRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,13 +54,15 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeCommand saveRecipeCommand(RecipeCommand command) {
+    public Mono<RecipeCommand> saveRecipeCommand(RecipeCommand command) {
 
-        return recipeRepository.save(recipeCommandToRecipe.convert(command)).map(recipeToRecipeCommand::convert).block();
+        return recipeRepository.save(recipeCommandToRecipe.convert(command))
+                .map(recipeToRecipeCommand::convert);
     }
 
     @Override
-    public void deleteById(String id) {
-        recipeRepository.deleteById(id).block();
+    public Mono<ResponseEntity<Void>> deleteById(String id) {
+        return recipeRepository.deleteById(id).map(x -> new ResponseEntity<>(x, HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 }
