@@ -13,6 +13,7 @@ import com.spring.recipegradle.repositories.UnitOfMeasureRepository;
 import com.spring.recipegradle.repositories.reactive.RecipeReactiveRepository;
 import com.spring.recipegradle.repositories.reactive.UnitOfMeasureReactiveRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -110,6 +111,7 @@ public class IngredientServiceImplTest {
 
     }
 
+    @Disabled
     @Test
     public void testDeleteById() throws Exception {
         //given
